@@ -1,0 +1,26 @@
+# 服务端口：Spring Boot 默认就是 8080，这里显式写出来，方便你以后改端口
+server:
+  port: 8080
+
+spring:
+  application:
+    name: book-system-boot
+
+  # 数据源：指向你已有的 book_system 库（就是 JavaWeb 项目那个库，直接复用）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: "jdbc:mysql://localhost:3306/book_system?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true"
+    username: root
+    password: szx20070814
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    # 数据库下划线字段 -> Java 驼峰属性（user_pwd -> userPwd）
+    map-underscore-to-camel-case: true
+    # 把执行的 SQL 打印到控制台，学习阶段非常有用（上线要关掉）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 主键自增策略，对应数据库的 AUTO_INCREMENT
+      id-type: auto
