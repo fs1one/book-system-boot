@@ -1,10 +1,10 @@
 package com.first.book.controller;
 
 import com.first.book.entity.Book;
-import com.first.book.mapper.BookMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.first.book.service.BookService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -13,12 +13,18 @@ import java.util.List;
 @RequestMapping("/book")
 public class BookController {
 
-    @Autowired
-    private BookMapper bookMapper;
+    private final BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @GetMapping("/list")
-    public List<Book> list(){
-        return bookMapper.selectList(null);
+    public List<Book> list(@RequestParam(required = false) Integer uid,
+                           @RequestParam(required = false) Integer status,
+                           @RequestParam(required = false) String keyword){
+
+        return bookService.listBooks(uid, status, keyword);
     }
 
 }
