@@ -1,5 +1,6 @@
 package com.first.book.controller;
 
+import com.first.book.common.Result;
 import com.first.book.entity.Book;
 import com.first.book.service.BookService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +21,13 @@ public class BookController {
     }
 
     @GetMapping("/list")
-    public List<Book> list(@RequestParam(required = false) Integer uid,
-                           @RequestParam(required = false) Integer status,
-                           @RequestParam(required = false) String keyword){
+    public Result<List<Book>> list(@RequestParam(required = false) Integer uid,
+                                   @RequestParam(required = false) Integer status,
+                                   @RequestParam(required = false) String keyword){
 
-        return bookService.listBooks(uid, status, keyword);
+        List<Book> books = bookService.listBooks(uid, status, keyword);
+
+        return Result.success(books);
     }
 
 }
