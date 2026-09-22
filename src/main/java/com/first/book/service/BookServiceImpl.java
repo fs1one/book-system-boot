@@ -2,6 +2,7 @@ package com.first.book.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.first.book.entity.Book;
+import com.first.book.exception.BizException;
 import com.first.book.mapper.BookMapper;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,10 @@ public class  BookServiceImpl implements BookService{
 
     @Override
     public List<Book> listBooks(Integer uid, Integer status, String keyword) {
+
+        if(uid != null && uid < 0){
+            throw new BizException("uid 不能为负数");
+        }
 
         QueryWrapper<Book> qw = new QueryWrapper<>();
 
