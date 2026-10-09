@@ -3,10 +3,8 @@ package com.first.book.controller;
 import com.first.book.common.Result;
 import com.first.book.entity.Book;
 import com.first.book.service.BookService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,4 +28,11 @@ public class BookController {
         return Result.success(books);
     }
 
+    @PostMapping("/save")
+    public Result<Void> save(@RequestBody @Validated Book book){
+
+        bookService.saveBook(book);
+
+        return Result.success(null);
+    }
 }

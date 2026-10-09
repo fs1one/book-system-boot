@@ -42,4 +42,13 @@ public class  BookServiceImpl implements BookService{
 
         return bookMapper.selectList(qw);
     }
+
+    public void saveBook(Book book){
+
+        int rows = bookMapper.insert(book);
+
+        if(rows == 0){
+            throw new BizException("保存失败");
+        }
+    }
 }

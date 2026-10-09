@@ -1,0 +1,32 @@
+### ① 正常新增 —— 应该成功
+POST http://localhost:8080/book/save
+Content-Type: application/json
+
+{"uid":1,"title":"测试书","author":"某人","price":29.9,"status":1}
+
+### ② 书名传空 —— 预期「书名不能为空」
+POST http://localhost:8080/book/save
+Content-Type: application/json
+
+{"uid":1,"title":"","author":"某人","price":29.9,"status":1}
+
+### ③ 价格传 -1 —— 预期「价格必须大于 0」
+POST http://localhost:8080/book/save
+Content-Type: application/json
+
+{"uid":1,"title":"测试书","author":"某人","price":-1,"status":1}
+
+### ④ 两个都错 —— 预期「书名不能为空；价格必须大于 0」
+POST http://localhost:8080/book/save
+Content-Type: application/json
+
+{"uid":1,"title":"","author":"某人","price":-1,"status":1}
+
+### ⑤ 价格不传 —— 预期「价格不能为空」
+POST http://localhost:8080/book/save
+Content-Type: application/json
+
+{"uid":1,"title":"测试书","author":"某人","status":1}
+
+### ⑥ 回查列表（浏览器打开也行）
+GET http://localhost:8080/book/list
