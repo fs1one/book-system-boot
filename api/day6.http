@@ -1,0 +1,51 @@
+### ============================================================
+### Day 6 验收 · JWT 登录认证
+### 用法：每个请求左边点绿色 ▶，一次点一个
+### 顺序：先跑 ①（token 会自动存进变量），再跑 ②③④⑤⑥⑦
+### ============================================================
+
+
+@host = http://localhost:8080
+
+
+### ① 登录成功 —— 应该拿到 token
+### 跑完这一条，token 就自动存好了，下面的 ④ ⑥ 直接能用，不用手动复制
+POST {{host}}/user/login
+Content-Type: application/json
+
+{"username":"stu31551","userPwd":"test123456"}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ② 密码传错 —— 预期「用户名或密码错误」
+POST {{host}}/user/login
+Content-Type: application/json
+
+{"username":"stu31551","userPwd":"wrongpassword"}
+
+
+### ③ 不带 token 访问列表 —— 预期「未登录，请先登录」（核心验收点）
+GET {{host}}/book/list
+
+
+### ④ 带 token 访问列表 —— 应该正常返回 7 条图书
+GET {{host}}/book/list
+Authorization: Bearer {{token}}
+
+
+### ⑤ 签名错误的 token —— 预期「登录已过期，请重新登录」
+### 想体验更真实的"篡改"：把 ① 拿到的 token 最后 3 个字符改掉，粘到下面替换
+GET {{host}}/book/list
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYWtlIiwidWlkIjo5OTl9.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+
+### ⑥ 当前登录人 —— 预期返回 uid=1（验证 ThreadLocal 链路）
+GET {{host}}/user/info
+Authorization: Bearer {{token}}
+
+
+### ⑦ 环境自检 —— 白名单放行，不用 token 也能访问
+GET {{host}}/hello

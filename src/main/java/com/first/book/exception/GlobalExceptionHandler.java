@@ -44,4 +44,11 @@ public class GlobalExceptionHandler {
         log.warn("参数校验失败：{}", sb);
         return Result.error(sb.toString());
     }
+
+    @ExceptionHandler(NotLoginException.class)
+    public Result<Void>  handleNotLoginException(NotLoginException e){
+
+        log.warn("未登录访问：{}", e.getMessage());
+        return Result.error(e.getMessage());
+    }
 }
