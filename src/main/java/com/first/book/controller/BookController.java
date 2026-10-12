@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping("/books")
 public class BookController {
 
     private final BookService bookService;
@@ -18,7 +18,7 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public Result<List<Book>> list(@RequestParam(required = false) Integer uid,
                                    @RequestParam(required = false) Integer status,
                                    @RequestParam(required = false) String keyword){
@@ -28,10 +28,36 @@ public class BookController {
         return Result.success(books);
     }
 
-    @PostMapping("/save")
-    public Result<Void> save(@RequestBody @Validated Book book){
+    @GetMapping("/{bid}")
+    public Result<Book> detail(@PathVariable Integer bid){
+
+        Book book = bookService.getBookById(bid);
+
+        return Result.success(book);
+    }
+
+    @PostMapping
+    public Result<Book> save(@RequestBody @Validated Book book){
 
         bookService.saveBook(book);
+
+        return Result.success(book);
+    }
+
+    @PutMapping("/{bid}")
+    public Result<Void> update(@PathVariable Integer bid,
+                               @RequestBody @Validated Book book){
+
+        book.setBid(bid);
+        bookService.updateBook(book);
+
+        return Result.success(null);
+    }
+
+    @DeleteMapping("/{bid}")
+    public Result<Void> delete(@PathVariable Integer bid){
+
+        bookService.deleteBook(bid);
 
         return Result.success(null);
     }

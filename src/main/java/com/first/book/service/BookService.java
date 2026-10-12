@@ -9,4 +9,10 @@ public interface BookService {
     List<Book> listBooks(Integer uid, Integer status, String keyword);
 
     void saveBook(Book book);
+
+    Book getBookById(Integer bid);
+
+    void updateBook(Book book);
+
+    void deleteBook(Integer bid);
 }

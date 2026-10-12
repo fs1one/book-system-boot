@@ -2,10 +2,11 @@ package com.first.book.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.first.book.entity.SysUser;
+import com.first.book.exception.BizException;
 import com.first.book.mapper.SysUserMapper;
+import com.first.book.util.Md5Util;
 import org.springframework.stereotype.Service;
 
-import java.security.MessageDigest;
 
 @Service
 public class SysUserServiceImpl implements SysUserService{
@@ -27,7 +28,7 @@ public class SysUserServiceImpl implements SysUserService{
             return null;
         }
 
-        String inputMd5 = md5(userPwd);
+        String inputMd5 = Md5Util.md5(userPwd);
 
         if(!inputMd5.equals(user.getUserPwd())){
             return null;
@@ -36,23 +37,23 @@ public class SysUserServiceImpl implements SysUserService{
         return user;
     }
 
-    private String md5(String src){
-        try{
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(src.getBytes());
+    @Override
+    public void regist(String username, String userPwd){
 
-            char[] hexChars = {'0', '1', '2', '3', '4', '5', '6', '7',
-                    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        QueryWrapper<SysUser> qw = new QueryWrapper<>();
+        qw.eq("username", username);
 
-            char[] chars = new char[bytes.length * 2];
-            int k = 0;
-            for (byte b : bytes) {
-                chars[k++] = hexChars[b >>> 4 & 0xf];
-                chars[k++] = hexChars[b & 0xf];
-            }
-            return new String(chars);
-        } catch (Exception e) {
-            throw new RuntimeException("MD5 加密出错", e);
+        if(sysUserMapper.selectOne(qw) != null){
+            throw new BizException("用户名已存在");
+        }
+
+        SysUser user = new SysUser();
+        user.setUsername(username);
+        user.setUserPwd(Md5Util.md5(userPwd));
+
+        int rows = sysUserMapper.insert(user);
+        if(rows == 0){
+            throw new BizException("注册失败，请稍后重试");
         }
     }
 }

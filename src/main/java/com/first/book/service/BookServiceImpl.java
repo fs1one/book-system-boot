@@ -43,12 +43,47 @@ public class  BookServiceImpl implements BookService{
         return bookMapper.selectList(qw);
     }
 
+    @Override
     public void saveBook(Book book){
 
         int rows = bookMapper.insert(book);
 
         if(rows == 0){
             throw new BizException("保存失败");
+        }
+    }
+
+    @Override
+    public Book getBookById(Integer bid) {
+
+        Book book = bookMapper.selectById(bid);
+
+        if(book == null){
+            throw new BizException("图书不存在");
+        }
+
+        return book;
+    }
+
+    @Override
+    public void updateBook(Book book){
+
+        Book exist = bookMapper.selectById(book.getBid());
+
+        if(exist == null){
+            throw new BizException("图书不存在");
+        }
+
+        bookMapper.updateById(book);
+    }
+
+    @Override
+    public void deleteBook(Integer bid){
+
+        int rows = bookMapper.deleteById(bid);
+
+        if(rows == 0){
+            throw new BizException("图书不存在");
         }
     }
 }

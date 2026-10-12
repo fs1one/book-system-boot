@@ -1,0 +1,102 @@
+### Day 7 验收 · 全接口贯通（注册 → 登录 → 查 → 增 → 改 → 删）
+### 用法：每个请求左边点绿色 ▶，一次点一个，绝不翻车
+### ④ 拿到 token 后，把 token 整段粘到下面 @token
+### ⑨ 新增成功后，把它返回体里的 bid 填到下面 @bid
+
+@host = http://localhost:8080
+@token = 先跑 ④ 登录，把返回的 token 整段粘到这里（不要带 Bearer 前缀）
+@bid = 先跑 ⑨ 新增，把返回体里的 bid 填到这里
+
+
+### ① 注册新用户 —— 预期 code=1 success
+POST {{host}}/user/regist
+Content-Type: application/json
+
+{"username":"day7test","userPwd":"abc123456"}
+
+
+### ② 重复注册同名 —— 预期「用户名已存在」
+POST {{host}}/user/regist
+Content-Type: application/json
+
+{"username":"day7test","userPwd":"abc123456"}
+
+
+### ③ 注册空字段 —— 预期「用户名不能为空；密码不能为空」
+POST {{host}}/user/regist
+Content-Type: application/json
+
+{}
+
+
+### ④ 新用户登录 —— 拿到 token，粘到顶部 @token
+POST {{host}}/user/login
+Content-Type: application/json
+
+{"username":"day7test","userPwd":"abc123456"}
+
+
+### ⑤ 不带 token 查列表 —— 预期「未登录，请先登录」
+GET {{host}}/books
+
+
+### ⑥ 带 token 查列表 —— 正常返回图书数组
+GET {{host}}/books
+Authorization: Bearer {{token}}
+
+
+### ⑦ 查详情 —— 预期返回 bid=13「测试书」那条（库里没有 13 就换真实 bid）
+GET {{host}}/books/13
+Authorization: Bearer {{token}}
+
+
+### ⑧ 查不存在的书 —— 预期「图书不存在」
+GET {{host}}/books/99999
+Authorization: Bearer {{token}}
+
+
+### ⑨ 新增图书 —— 预期 code=1，data 里有 bid（填到顶部 @bid）
+POST {{host}}/books
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{"uid":1,"title":"Day7 验收临时书","author":"小多","price":66.6,"status":1}
+
+
+### ⑩ 新增缺 title —— 预期「书名不能为空」
+POST {{host}}/books
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{"uid":1,"price":10}
+
+
+### ⑪ 修改 ⑨ 的书 —— 预期 code=1（body 必须带 title + price）
+PUT {{host}}/books/{{bid}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{"title":"Day7 验收临时书（已改）","author":"小多","price":88.8,"status":0}
+
+
+### ⑫ 再查它详情 —— 预期 title/price 是改后的值
+GET {{host}}/books/{{bid}}
+Authorization: Bearer {{token}}
+
+
+### ⑬ 修改不存在的书 —— 预期「图书不存在」
+PUT {{host}}/books/99999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{"title":"幽灵书","price":1.0}
+
+
+### ⑭ 删除 ⑨ 的书 —— 预期 code=1
+DELETE {{host}}/books/{{bid}}
+Authorization: Bearer {{token}}
+
+
+### ⑮ 删除后再查它 —— 预期「图书不存在」（全流程闭环）
+GET {{host}}/books/{{bid}}
+Authorization: Bearer {{token}}

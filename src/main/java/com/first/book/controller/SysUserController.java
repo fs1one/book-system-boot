@@ -1,13 +1,14 @@
 package com.first.book.controller;
 
 import com.first.book.common.Result;
+import com.first.book.dto.LoginDTO;
+import com.first.book.dto.RegistDTO;
 import com.first.book.entity.SysUser;
 import com.first.book.exception.BizException;
-import com.first.book.mapper.SysUserMapper;
 import com.first.book.service.SysUserService;
 import com.first.book.util.JwtUtil;
 import com.first.book.util.UserContext;
-import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -23,19 +24,16 @@ public class SysUserController {
         this.sysUserService = sysUserService;
     }
 
-    @Data
-    public static class LoginDTO{
-        private String username;
-        private String userPwd;
+    @PostMapping("/regist")
+    public Result<Void> regist(@RequestBody @Validated RegistDTO dto){
+
+        sysUserService.regist(dto.getUsername(), dto.getUserPwd());
+
+        return Result.success(null);
     }
 
     @PostMapping("/login")
-    public Result<Map<String, Object>> login(@RequestBody LoginDTO dto){
-
-        if(dto.getUsername() == null || dto.getUsername().isBlank()
-                || dto.getUserPwd() == null || dto.getUserPwd().isBlank()){
-            throw new BizException("用户名和密码不能为空");
-        }
+    public Result<Map<String, Object>> login(@RequestBody @Validated LoginDTO dto){
 
         SysUser user = sysUserService.login(dto.getUsername(), dto.getUserPwd());
 
