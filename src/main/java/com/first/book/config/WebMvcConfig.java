@@ -23,7 +23,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
                              "/user/login",
                              "/user/regist",
                              "/hello",
-                             "/error"
+                             "/error",
+                             "/doc.html",
+                             "/webjars/**",
+                             "/v3/api-docs/**",
+                             "/swagger-ui/**",
+                             "/swagger-ui.html",
+                             "/knife4j"
                      );
     }
 }

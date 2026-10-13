@@ -66,6 +66,12 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.baizhukui</groupId>
+			<artifactId>knife4j-openapi3-boot4-spring-boot-starter</artifactId>
+			<version>5.7.7</version>
+		</dependency>
 	</dependencies>
 
 	<build>

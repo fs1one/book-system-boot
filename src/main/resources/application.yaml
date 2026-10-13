@@ -33,3 +33,16 @@ mybatis-plus:
     db-config:
       # 主键自增策略，对应数据库的 AUTO_INCREMENT
       id-type: auto
+
+springdoc:
+  api-doc:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn

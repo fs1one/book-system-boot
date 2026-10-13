@@ -8,12 +8,15 @@ import com.first.book.exception.BizException;
 import com.first.book.service.SysUserService;
 import com.first.book.util.JwtUtil;
 import com.first.book.util.UserContext;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "用户管理", description = "注册、登录、当前登录人")
 @RestController
 @RequestMapping("/user")
 public class SysUserController {
@@ -24,6 +27,7 @@ public class SysUserController {
         this.sysUserService = sysUserService;
     }
 
+    @Operation(summary = "注册")
     @PostMapping("/regist")
     public Result<Void> regist(@RequestBody @Validated RegistDTO dto){
 
@@ -32,6 +36,7 @@ public class SysUserController {
         return Result.success(null);
     }
 
+    @Operation(summary = "登录", description = "成功后返回 token，填到文档页左侧「OpenAPI 鉴权」里再调试其他接口")
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@RequestBody @Validated LoginDTO dto){
 
@@ -51,6 +56,7 @@ public class SysUserController {
         return Result.success(data);
     }
 
+    @Operation(summary = "当前登录人信息")
     @GetMapping("/info")
     public Result<Map<String, Object>> info() {
 
