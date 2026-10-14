@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.first.book.entity.Book;
 import com.first.book.exception.BizException;
 import com.first.book.mapper.BookMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +19,7 @@ public class  BookServiceImpl implements BookService{
         this.bookMapper = bookMapper;
     }
 
+    @Cacheable(value = "bookList", key = "#uid + ':' + #status + ':' + #keyword")
     @Override
     public List<Book> listBooks(Integer uid, Integer status, String keyword) {
 
@@ -43,6 +46,7 @@ public class  BookServiceImpl implements BookService{
         return bookMapper.selectList(qw);
     }
 
+    @CacheEvict(value = "bookList", allEntries = true)
     @Override
     public void saveBook(Book book){
 
@@ -65,6 +69,7 @@ public class  BookServiceImpl implements BookService{
         return book;
     }
 
+    @CacheEvict(value = "bookList", allEntries = true)
     @Override
     public void updateBook(Book book){
 
@@ -77,6 +82,7 @@ public class  BookServiceImpl implements BookService{
         bookMapper.updateById(book);
     }
 
+    @CacheEvict(value = "bookList", allEntries = true)
     @Override
     public void deleteBook(Integer bid){
 
