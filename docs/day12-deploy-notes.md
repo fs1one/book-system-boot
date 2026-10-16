@@ -80,6 +80,11 @@ docker run -d --name book-system --network book-net -p 8080:8080 \
 - 配置通过 `-e` 环境变量注入，不进代码、不进镜像
 - 服务器上凭据文件 `/root/.db_pw`（600 权限，只有 root 可读）
 - SSH 已配置**密钥登录**（本地 `~/.ssh/id_ed25519`）
+- **SSH 仅密钥登录**（2026-10-16 晚加固）：`/etc/ssh/sshd_config.d/99-hardening.conf` 中 `PasswordAuthentication no` + `PermitRootLogin prohibit-password`；密码通道已关闭
+- **fail2ban 已安装**：SSH 多次失败自动封禁 IP
+
+> 背景：服务器上线当天即遭遇机器人爆破（auth.log 记录 15 次失败尝试，来自多个陌生 IP，尝试 admin/root/elasticsearch 等用户名）——这是公网服务器的常态，所以做了上述加固。
+
 
 ## 踩坑记录（真实事故，都是经验）
 
