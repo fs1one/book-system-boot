@@ -10,8 +10,9 @@
 [![Docker](https://img.shields.io/badge/Docker-deployed-2496ED)](https://www.docker.com/)
 
 **在线调试：http://81.71.101.43:8080/doc.html**
-（Knife4j 页面，可以直接发请求。先调
-/user/regist 注册一个账号，登录拿 token 再调图书接口。）
+（Knife4j 页面，可以直接发请求。先调 `/user/regist` 注册一个账号，
+登录拿 token 再调图书接口。）
+
 ## 功能
 
 | 模块 | 能做什么 | 实现要点 |
@@ -21,6 +22,7 @@
 | 缓存 | 列表查询走缓存，增删改后自动清缓存 | Spring Cache + Redis |
 | 文档 | 在线接口文档，填 token 后可直接调试 | Knife4j（OpenAPI 3） |
 | 部署 | 应用 + MySQL + Redis 三容器一个内网，只暴露 8080 | Dockerfile + docker network |
+
 ## 技术栈
 
 | 分类 | 技术 | 版本 | 用途 |
@@ -34,6 +36,7 @@
 | 接口文档 | Knife4j | 5.7.7 | OpenAPI 3 文档界面 |
 | 构建 | Maven Wrapper | 仓库自带 | 依赖管理、打包 |
 | 部署 | Docker | - | 三容器，手工 `docker run` |
+
 ## 架构
 
 ```mermaid
@@ -42,6 +45,7 @@ flowchart LR
     A -->|MyBatis-Plus| M[("book-mysql<br/>MySQL 8.0")]
     A -->|Spring Cache| R[("book-redis<br/>Redis 7")]
 ```
+
 ## 快速开始
 
 ### 1. 准备
@@ -53,9 +57,11 @@ flowchart LR
 
 ### 2. 建库建表
 
-```bash
-mysql -uroot -p < docs/sql/schema.sql
+```powershell
+Get-Content docs\sql\schema.sql | mysql -uroot -p
 ```
+
+（这个脚本开头是 `DROP TABLE`，会重建 `book` 和 `sys_user`，库里已有的数据会没。）
 
 ### 3. 配数据库密码
 
@@ -84,6 +90,7 @@ http://localhost:8080/doc.html
 演示账号 `demo` / `demo123`，或者自己调 `/user/regist` 注册一个。
 登录返回的 token 填到文档页右上角的「Authorize」（Knife4j 里叫「OpenAPI 鉴权」），
 之后 `/books` 下的接口才调得动。
+
 ## 接口一览
 
 | 方法 | 路径 | 说明 | 需要 token |
@@ -100,22 +107,7 @@ http://localhost:8080/doc.html
 
 白名单在 `config/WebMvcConfig.java` 里，除了上表标"否"的三个，还有文档页面本身
 （`/doc.html`、`/webjars/**`、`/v3/api-docs/**`）也放行了。
-## 接口一览
 
-| 方法 | 路径 | 说明 | 需要 token |
-| --- | --- | --- | --- |
-| POST | `/user/regist` | 注册 | 否 |
-| POST | `/user/login` | 登录，返回 token | 否 |
-| GET | `/user/info` | 当前登录人信息 | 是 |
-| GET | `/books` | 图书列表，可选 `uid` / `status` / `keyword` | 是 |
-| GET | `/books/{bid}` | 图书详情 | 是 |
-| POST | `/books` | 新增图书 | 是 |
-| PUT | `/books/{bid}` | 修改图书 | 是 |
-| DELETE | `/books/{bid}` | 删除图书 | 是 |
-| GET | `/hello` | 连通性自检，返回固定 JSON | 否 |
-
-白名单在 `config/WebMvcConfig.java` 里，除了上表标"否"的三个，还有文档页面本身
-（`/doc.html`、`/webjars/**`、`/v3/api-docs/**`）也放行了。
 ## 项目结构
 
 ```text
@@ -143,6 +135,7 @@ book-system-boot
 ├── Dockerfile                # eclipse-temurin:17-jre
 └── pom.xml
 ```
+
 ## 几个关键设计
 
 **1. 统一返回体**
@@ -160,6 +153,7 @@ book-system-boot
 **4. 列表查询缓存**
 `@Cacheable` 加在列表查询上，`@CacheEvict` 加在增删改上——改完自动清缓存，避免读到旧列表。
 缓存时踩过一个坑：实体没实现序列化，第二次查询直接报错，后来给缓存配了 JSON 序列化。
+
 ## 学习笔记
 
 这个项目是一天一天写出来的，过程中踩的坑都留了记录：
@@ -167,6 +161,7 @@ book-system-boot
 - [Day 10 · MySQL 索引实测](docs/day10-mysql-index-report.md)：给 `book` 表加了索引，用 `EXPLAIN` 对比前后执行计划
 - [Day 11 · Docker 打包](docs/day11-docker-notes.md)：第一次 `docker build`，以及镜像加速器全挂的那两千秒
 - [Day 12 · 部署上线](docs/day12-deploy-notes.md)：腾讯云三容器部署、防火墙、SSH 加固
+
 ## 部署
 
 镜像基于 `eclipse-temurin:17-jre`，构建和运行：
@@ -180,9 +175,8 @@ docker run -d --name book-system --network book-net -p 8080:8080 \
   book-system:1.0
 ```
 
-MySQL 和 Redis 跑在同一个自定义网络里，
-不对公网暴露端口
-。
+MySQL 和 Redis 跑在同一个自定义网络里，**不对公网暴露端口**。
+
 完整过程（含防火墙、SSH 加固、踩坑）见 [Day 12 部署记录](docs/day12-deploy-notes.md)。
 
 ## TODO
