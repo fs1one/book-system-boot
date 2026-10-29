@@ -338,3 +338,15 @@ python orchestrator.py gate --task demo/specs/pricing-hardening-4.json --base or
 1. **`fetch-depth: 0`**：`gate` 要算 `merge-base`，浅克隆会直接失败。
 2. **换行归一化**：Windows 上 `core.autocrlf` 会把 LF 转成 CRLF，`frozen` 一开始因此误报。
    比较前统一 `\r\n → \n`，比的是内容不是工作区风格。
+
+---
+
+## 本仓库的绑定状态（book-system-boot）
+
+| 环节 | 需要什么 | 怎么验证 |
+|---|---|---|
+| 本地生产（producer） | CodeBuddy CLI **已登录**（登录态不跟随仓库，换机器/换人要各自 `/login`） | `run.cmd doctor --deep`（会发一次最小请求） |
+| 本地验证 + 评审 | 无（DSH 侧确定性检查 + 评审） | `run.cmd run --task specs/money-utils.json` |
+| CI（`.github/workflows/agent-gate.yml`） | 无登录态、无积分、无外网模型调用 | PR 上自动跑 `gate` |
+
+`gate` 与 `run` 的分工：`run` 会调模型产出代码，只能在本机跑；`gate` 只做确定性判定，所以能进 CI。

@@ -1,0 +1,44 @@
+# Agent Gate：只跑确定性检查，不启动 CodeBuddy
+#
+# 为什么 CI 不跑 producer：
+#   - 需要本机登录态（token 进 secret 才能跑）、消耗积分、依赖外网模型服务
+#   - 耗时不可预期，结果不确定
+# CI 的职责是判断「这个 PR 能不能合」，所以只跑 gate：冻结测试完整性、范围、测试、凭据扫描、体积。
+
+name: agent-gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # gate 要算 merge-base，浅克隆会失败
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Gate（冻结测试 + 范围 + mvn test）
+        run: |
+          cd multiagent
+          python orchestrator.py gate \
+            --task specs/money-utils.json \
+            --base "origin/${{ github.base_ref }}"
+
+      - name: 上传门禁报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-gate-report
+          path: multiagent/.multiagent/gates/

@@ -588,7 +588,7 @@ def _resume_locked(cfg: dict, state: dict, spec: dict) -> int:
     return 3
 
 
-def cmd_doctor(_args) -> int:
+def cmd_doctor(args) -> int:
     print("\n环境自检")
     print("-" * 64)
     ok = True
@@ -626,6 +626,30 @@ def cmd_doctor(_args) -> int:
         line("", "HINT", "装完先在终端跑一次 codebuddy 完成登录")
 
     line("producer 模式", BASE_CFG["producer"]["mode"], "（--mode 可临时覆盖）")
+
+    # --deep：真的发一次最小请求，验证「登录态」而不只是「装了没」。
+    # 会消耗极少量积分，所以默认不跑。
+    if getattr(args, "deep", False):
+        try:
+            prefix, _ = workers._resolve_launcher(cb["cmd"][0])
+            p = subprocess.run(
+                [*prefix, "-p", "只回复 ok", "--output-format", "text",
+                 "--no-session-persistence"],
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                timeout=120,
+            )
+            answer = (p.stdout or p.stderr or "").strip().splitlines()
+            tail = answer[-1][:60] if answer else ""
+            if p.returncode == 0 and tail:
+                line("登录态", "OK", tail)
+            else:
+                ok = False
+                line("登录态", "MISSING", tail or f"exit={p.returncode}")
+                line("", "HINT", "在终端运行 codebuddy 后输入 /login")
+        except Exception as exc:
+            ok = False
+            line("登录态", "ERROR", str(exc)[:80])
+
     print("-" * 64)
     if ok:
         print("  全部就绪：run.cmd run --task <spec>.json --mode codebuddy")
@@ -686,7 +710,9 @@ def main() -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("bootstrap", help="初始化 demo 仓库并提交基线")
-    sub.add_parser("doctor", help="自检 git / node / 仓库 / CodeBuddy CLI")
+    p_doc = sub.add_parser("doctor", help="自检 git / node / 仓库 / CodeBuddy CLI")
+    p_doc.add_argument("--deep", action="store_true",
+                       help="额外发一次最小请求验证登录态（消耗极少量积分）")
 
     p_run = sub.add_parser("run", help="规划 -> 产出 -> 验证（如通过则暂停等待评审）")
     p_run.add_argument("--task", required=True, help="任务契约 JSON 路径")
