@@ -1,6 +1,7 @@
 package com.first.book.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.first.book.common.MoneyUtils;
 import com.first.book.entity.Book;
 import com.first.book.exception.BizException;
 import com.first.book.mapper.BookMapper;
@@ -50,6 +51,8 @@ public class  BookServiceImpl implements BookService{
     @Override
     public void saveBook(Book book){
 
+        normalizePriceOf(book);
+
         int rows = bookMapper.insert(book);
 
         if(rows == 0){
@@ -79,7 +82,21 @@ public class  BookServiceImpl implements BookService{
             throw new BizException("图书不存在");
         }
 
+        normalizePriceOf(book);
+
         bookMapper.updateById(book);
+    }
+
+    /**
+     * 价格归一化到「分」的精度；null 保持原样，交给 Book 上的 @NotNull 校验。
+     */
+    private void normalizePriceOf(Book book) {
+
+        if(book == null || book.getPrice() == null){
+            return;
+        }
+
+        book.setPrice(MoneyUtils.normalizePrice(book.getPrice()));
     }
 
     @CacheEvict(value = "bookList", allEntries = true)
