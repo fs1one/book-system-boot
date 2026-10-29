@@ -35,3 +35,7 @@ build/
 # agent pipeline runtime
 multiagent/.multiagent/
 multiagent/.worktrees/
+
+# python cache
+__pycache__/
+*.pyc
