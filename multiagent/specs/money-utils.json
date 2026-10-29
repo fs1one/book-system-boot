@@ -1,0 +1,28 @@
+{
+  "id": "money-utils",
+  "title": "金额按「分」归一化：新增 MoneyUtils 并在保存/更新时归一化价格",
+  "background": "Book.price 是 Double，saveBook / updateBook 直接入库，没有做任何舍入。45.499999、45.505 这类值会以不同精度落库，amount 用 double 是这类图书项目的典型隐患。这次先把「元 ↔ 分」的换算收敛到一个纯工具类，并在服务层入口归一化；不动数据库字段类型（那是下一个任务）。",
+  "owner_globs": [
+    "src/main/java/com/first/book/common/MoneyUtils.java",
+    "src/main/java/com/first/book/service/BookServiceImpl.java"
+  ],
+  "forbidden_globs": [
+    "src/test/**",
+    "pom.xml",
+    "multiagent/**",
+    ".github/**"
+  ],
+  "planner_seed": "seeds/money-utils",
+  "acceptance": [
+    "新增 com.first.book.common.MoneyUtils，提供 toCents(Double)、toYuan(long)、format(long)、normalizePrice(Double) 四个静态方法",
+    "toCents 按十进制四舍五入到分：45.505 → 4551、45.4999 → 4550、0.1+0.2 → 30（必须用 BigDecimal 或等价方式，不能用 double 直接 Math.round）",
+    "toCents 对 null / NaN / ±Infinity / 负数 抛 IllegalArgumentException（不是 NullPointerException），信息里带上原值",
+    "format 输出两位小数并带货币符号：4550 → ¥45.50、-4550 → -¥45.50、0 → ¥0.00（负号在货币符号前）",
+    "normalizePrice 等价于 toYuan(toCents(x))；toYuan 与 toCents 互为逆运算",
+    "BookServiceImpl 的 saveBook 与 updateBook 在 price 非 null 时，先归一化到分再入库；null 价格保持原样交给既有校验",
+    "不得修改 pom.xml、src/test/**、multiagent/**，不得引入新依赖",
+    "既有代码保持可编译（mvn -q -DskipTests compile 通过）"
+  ],
+  "max_repair_rounds": 2,
+  "requires_review": true
+}

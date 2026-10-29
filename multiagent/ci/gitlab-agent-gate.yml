@@ -1,0 +1,21 @@
+# GitLab CI：Agent Gate
+#
+# 与 GitHub Actions 版本等价：只跑确定性检查，不调模型、不联网、不消耗积分。
+# 放到仓库根的 .gitlab-ci.yml（或 include 这个文件）。
+
+agent-gate:
+  image: node:22-bookworm
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 git
+  script:
+    - cd multiagent
+    - >
+      python3 orchestrator.py gate
+      --task demo/specs/pricing-hardening-4.json
+      --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+  artifacts:
+    when: always
+    paths:
+      - multiagent/.multiagent/gates/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"

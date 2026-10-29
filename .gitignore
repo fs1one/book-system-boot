@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# agent pipeline runtime
+multiagent/.multiagent/
+multiagent/.worktrees/

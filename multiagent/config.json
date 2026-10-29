@@ -1,0 +1,28 @@
+{
+  "project_dir": "..",
+  "worktree_root": ".worktrees",
+  "state_dir": ".multiagent",
+  "integration_branch": "main",
+  "producer": {
+    "mode": "codebuddy",
+    "allow_fallback": false,
+    "codebuddy": {
+      "cmd": ["codebuddy", "-p", "{prompt}", "--model", "deepseek-v4.1-flash", "--output-format", "json", "--permission-mode", "acceptEdits", "--no-session-persistence", "--tools", "Read,Edit,Write,Glob,Grep"],
+      "version_cmd": ["codebuddy", "--version"],
+      "timeout_sec": 900,
+      "note": "真实仓库接入：项目根在 ..；测试用 Maven（-Dtest 限定单类，避开需要 MySQL/Redis 的 @SpringBootTest）。--tools 只给读写，验证由编排器跑。"
+    }
+  },
+  "demo": {
+    "mock_dir": "seeds"
+  },
+  "checks": {
+    "test_cmd": ["mvn", "test", "-Dtest=MoneyUtilsTest", "-Dsurefire.failIfNoSpecifiedTests=false"],
+    "timeout_sec": 600,
+    "max_diff_lines": 300
+  },
+  "integrator": {
+    "coauthor_trailer": "Co-authored-by: CodeBuddy <noreply@codebuddy.ai>"
+  }
+}
+

@@ -1,0 +1,46 @@
+# GitHub Actions：Agent Gate
+#
+# 设计前提：CI 只做「确定性门禁」，不启动 CodeBuddy。
+#   - 不需要 CodeBuddy CLI / 登录态 / 积分
+#   - 不需要外网访问模型服务
+#   - 秒级完成，天然可审计
+# producer 在本地（或由人触发）跑，产出 PR；CI 负责判断这个 PR 能不能合。
+#
+# 放在仓库根的 .github/workflows/ 下生效。若你的项目不在 demo/project，
+# 把 config.json 的 project_dir 改成 "." 并删掉 `cd multiagent`（或按实际结构调整）。
+
+name: agent-gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # gate 需要 merge-base，浅克隆会失败
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"    # --test-isolation=none 需要 Node >= 22
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 冻结测试完整性 + 确定性门禁
+        run: |
+          cd multiagent
+          python orchestrator.py gate \
+            --task demo/specs/pricing-hardening-4.json \
+            --base "origin/${{ github.base_ref }}"
+
+      - name: 上传门禁报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-gate-report
+          path: multiagent/.multiagent/gates/
